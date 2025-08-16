@@ -1,0 +1,6 @@
+type ToggleSelectorMock_BestProtocolSelected {
+  id: ID!
+  timestamp: BigInt!
+  protocol: BigInt!
+}
+
