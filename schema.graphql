@@ -1,6 +1,15 @@
-type ToggleSelectorMock_BestProtocolSelected {
+type lastBestProtocolSelected {
   id: ID!
   timestamp: BigInt!
   protocol: BigInt!
+  blockNumber: BigInt!
 }
+
+type bestProtocolSelected {
+  id: ID!
+  timestamp: BigInt!
+  protocol: BigInt!
+  blockNumber: BigInt!
+}
+
 
