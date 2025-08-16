@@ -2,10 +2,14 @@
  * Please refer to https://docs.envio.dev for a thorough guide on all Envio indexer features
  */
 
-
 import {
   ToggleSelectorMock
 } from "generated";
+
+import { sendWebhook } from "./webhook";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 ToggleSelectorMock.BestProtocolSelected.handler(async ({ event, context }) => {
   // Always index all events in time
@@ -17,16 +21,19 @@ ToggleSelectorMock.BestProtocolSelected.handler(async ({ event, context }) => {
   };
   context.bestProtocolSelected.set(entity);
 
-  // Index or update the lastBestProtocolSelected only if this event is after the last block
-  const last = await context.lastBestProtocolSelected.get("last");
-  const currentBlock = BigInt(event.block.number);
-  if (!last || currentBlock > BigInt(last.blockNumber)) {
-    const lastEntity = {
-      id: "last",
-      timestamp: event.params.timestamp,
-      protocol: event.params.protocol,
-      blockNumber: currentBlock,
-    };
-    context.lastBestProtocolSelected.set(lastEntity);
-  }
+  const lastEntity = {
+    id: "last",
+    timestamp: event.params.timestamp,
+    protocol: event.params.protocol,
+    blockNumber: BigInt(event.block.number),
+  };
+  context.lastBestProtocolSelected.set(lastEntity);
+
+
+  await sendWebhook(process.env.WEBHOOK_URL!, {
+    id: entity.id,
+    timestamp: entity.timestamp,
+    protocol: entity.protocol,
+    blockNumber: entity.blockNumber,
+  });
 });
