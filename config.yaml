@@ -2,7 +2,7 @@
 name: upcentIndexer
 networks:
 - id: 84532
-  start_block: 29794900
+  start_block: 29802590
   contracts:
   - name: ToggleSelectorMock
     address:

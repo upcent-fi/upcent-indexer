@@ -6,7 +6,7 @@ import {
   ToggleSelectorMock
 } from "generated";
 
-import { sendWebhook } from "./webhook";
+import { sendEmail } from "./email";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -30,10 +30,27 @@ ToggleSelectorMock.BestProtocolSelected.handler(async ({ event, context }) => {
   context.lastBestProtocolSelected.set(lastEntity);
 
 
-  await sendWebhook(process.env.WEBHOOK_URL!, {
-    id: entity.id,
-    timestamp: entity.timestamp,
-    protocol: entity.protocol,
-    blockNumber: entity.blockNumber,
-  });
+  let protocolMsg = '';
+  const protocolNum = Number(entity.protocol);
+  if (protocolNum === 0) {
+    protocolMsg = 'You should move your funds to Aave.';
+  } else if (protocolNum === 1) {
+    protocolMsg = 'You should move your funds to Morpho.';
+  } else {
+    protocolMsg = 'Unknown protocol.';
+  }
+
+  // Convert timestamp (assumed seconds) to human-readable string
+  const date = new Date(Number(entity.timestamp) * 1000);
+  const dateStr = date.toLocaleString();
+
+  if (!context.isPreload) {
+    await sendEmail({
+      to: process.env.NOTIFY_EMAIL!,
+      subject: 'Better protocol detected on Upcent',
+      text: `Timestamp: ${dateStr}\n${protocolMsg}`
+    });
+  }
+
+  console.log(`Best protocol selected: ${protocolMsg} at ${dateStr}`);
 });
